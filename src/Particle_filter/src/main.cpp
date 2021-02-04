@@ -1,6 +1,8 @@
 #include <iostream>
+
 #include <math.h>
 #include <random>
+#include <string>
 #include <vector>
 #include <thread>
 #include <mutex>
