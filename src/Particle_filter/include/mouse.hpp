@@ -1,6 +1,8 @@
 class MouseInterface
 {
 public:
+	bool click_flag = false;
+
 	static void CallBackFunc(int event, int x, int y, int flags, void *userdata)
 	{
 		if (event == cv::EVENT_LBUTTONDOWN)
