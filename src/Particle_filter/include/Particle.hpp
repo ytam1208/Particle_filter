@@ -156,8 +156,8 @@ private:
     cv::Point after_point;
     cv::Point click_point;
 
-    float Particle_weight_Up = 0.8f;
-    float Particle_weight_Down = 0.2f;
+    float Particle_weight_Up = 2.0f;
+    float Particle_weight_Down = 1.0f;
 
     int Observation_range = 200;
 
