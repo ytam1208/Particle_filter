@@ -62,7 +62,7 @@ private:
 public:
     cv::Mat src;
     std::vector<Particle> particle_vector;
-    int Particle_count = 5000; //파티클의 갯수 1000개
+    int Particle_count = 1000; //총 생성 파티클의 갯수
 
 public:
     Map()
@@ -75,9 +75,6 @@ public:
 
     void initMap()
     {
-        std::random_device rd1, rd2;
-        std::uniform_int_distribution<int> dis(0, Particle_count - 1);
-
         if (src.channels() == 3)
         {
             int MAX_MAT_RANGE = ((init_ROW + init_COL) / 2);
@@ -93,9 +90,9 @@ public:
         for (int i = 0; i < Particle_count; i++)
         {
             if (_init_particle_vector[i].x <= 0 || _init_particle_vector[i].y <= 0)
-                _init_particle_vector[i].weight = 0;
-            else if (_init_particle_vector[i].x >= 1000 || _init_particle_vector[i].y >= 1000)
-                _init_particle_vector[i].weight = 0;
+                _init_particle_vector[i].weight = 0.0f;
+            else if (_init_particle_vector[i].x >= init_COL || _init_particle_vector[i].y >= init_COL)
+                _init_particle_vector[i].weight = 0.0f;
         }
         return _init_particle_vector;
     }
@@ -156,7 +153,6 @@ public:
 
             if (mouse_event.click_flag)
             {
-                // init_particle_vector = check_map.checkOutlier(init_particle_vector);
                 if (click_point.x > 0 && click_point.y > 0)
                 {
                     cv::circle(init_map, cv::Point(click_point.x, click_point.y), Observation_range, cv::Scalar(255, 0, 0), 1, -1, 0);
@@ -164,6 +160,7 @@ public:
                 }
 
                 Circle_check(&click_point, init_particle_vector, init_map);
+                init_particle_vector = check_map.checkOutlier(init_particle_vector);
                 init_particle_vector = Normalize_Particle_Weight(init_particle_vector);
                 Uniform_Resampling(&click_point, init_particle_vector, init_map);
 
@@ -262,10 +259,6 @@ public:
 
         for (int i = 0; i < particle_count; i++)
         {
-            // int x_ = pow(_init_particle_vector[i].x - x, 2);
-            // int y_ = pow(_init_particle_vector[i].y - y, 2);
-            // int distance = sqrt(x_ + y_);
-
             add_particle_weight += _init_particle_vector[i].weight;
             if (i == 0)
                 Search_weight += dist(gen);
