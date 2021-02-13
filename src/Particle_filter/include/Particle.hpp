@@ -36,50 +36,17 @@ public:
         return random_particle_vector;
     }
 
-    double GaussianRandom()
+    double GaussianRandom() //make Gaussian normal distribution
     {
-        double v1, v2, s, temp;
-        double average = 0.0; //평균
-        double stdev = 10.0; //표준 편차(시그마)
+        int average = 0;
+        double segma = 10.0;
 
-        do
-        {
-            v1 = 11 * ((double)rand() / RAND_MAX) - 1; // -10.0 ~ 10.0 까지의 값
-            v2 = 11 * ((double)rand() / RAND_MAX) - 1; // -10.0 ~ 10.0 까지의 값
-            s = v1 * v1 + v2 * v2;
-        } while (s >= 1 || s == 0);
-
-        s = sqrt((-2 * log(s)) / s);
-
-        temp = v1 * s;
-        temp = (stdev * temp) + average;
-
-        return temp;
-    }
-
-    // double GaussianRandom()
-    // {
-    //     double v1, v2, s;
-    //     do
-    //     {
-    //         v1 = 2 * ((double)rand() / RAND_MAX) - 1; //-1.0 ~ 1.0 까지의 값
-    //         v2 = 2 * ((double)rand() / RAND_MAX) - 1; //-1.0 ~ 1.0 까지의 값
-
-    //         s = v1 * v1 + v2 * v2;
-    //     } while (s >= 1 || s == 0);
-    //     s = sqrt((-2 * log(s)) / s);
-
-    //     return v1 * s;
-    // }
-
-    double RNG_Random()
-    {
-        cv::RNG rng(cv::getTickCount());
-        //int num = rng.uniform(-10, 10);
-        double sigma = 2.0;
-        double num = rng.gaussian(sigma);
-
-        return num;
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::normal_distribution<double> dist(average, segma);
+        double result = std::round(dist(gen));
+        
+        return result;
     }
 };
 
@@ -144,7 +111,6 @@ private:
     Map first_map;
     Map check_map;
     Random_Particle_make random;
-    Random_Particle_make random2;
 
 private:
     std::thread process;
@@ -180,13 +146,7 @@ public:
             for (int i = 0; i < particle_count; i++)
             {
                 motion_particle.x = motion_particle_vector[i].x + (int)random.GaussianRandom();
-                motion_particle.y = motion_particle_vector[i].y + (int)random2.GaussianRandom();
-                // motion_particle.x = motion_particle_vector[i].x + (int)random.RNG_Random();
-                // motion_particle.y = motion_particle_vector[i].y + (int)random2.RNG_Random();
-                // motion_particle_vector[i].x += (int)random.RNG_Random();
-                // motion_particle_vector[i].y += (int)random.RNG_Random();
-                // motion_particle.x = motion_particle_vector[i].x;
-                // motion_particle.y = motion_particle_vector[i].y;
+                motion_particle.y = motion_particle_vector[i].y + (int)random.GaussianRandom();
 
                 motion_particle.weight = 1.0f / (float)particle_count;
                 init_particle_vector.push_back(motion_particle);

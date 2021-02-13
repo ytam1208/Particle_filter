@@ -1,0 +1,8 @@
+prefix=/home/cona/Particle_filter/install
+
+Name: Particle_filter
+Description: Description of Particle_filter
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: roscpp
