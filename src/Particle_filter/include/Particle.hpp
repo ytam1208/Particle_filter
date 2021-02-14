@@ -39,13 +39,13 @@ public:
     double GaussianRandom() //make Gaussian normal distribution
     {
         int average = 0;
-        double segma = 10.0;
+        double segma = 20.0;
 
         std::random_device rd;
         std::mt19937 gen(rd());
         std::normal_distribution<double> dist(average, segma);
         double result = std::round(dist(gen));
-        
+
         return result;
     }
 };
@@ -98,16 +98,109 @@ public:
     }
 };
 
+class Sampling
+{
+private:
+    Map init_map;
+
+public:
+    void Uniform_Resampling(cv::Point *click_point, std::vector<Particle> &_init_particle_vector, std::vector<Particle> &Sampling_vector)
+    {
+        cv::Point *zero_point = (cv::Point *)click_point;
+        int x = zero_point->x;
+        int y = zero_point->y;
+
+        float Search_weight = 0.0f;
+        float add_particle_weight = 0.0f;
+        Sampling_vector.reserve(_init_particle_vector.size());
+
+        std::random_device rd;
+        std::default_random_engine gen(rd());
+        std::uniform_real_distribution<float> dist(0.0, (float)(1.0 / init_map.Particle_count));
+
+        for (int i = 0; i < init_map.Particle_count; i++)
+        {
+            add_particle_weight += _init_particle_vector[i].weight;
+            if (i == 0)
+                Search_weight += dist(gen);
+
+            if (Search_weight > add_particle_weight)
+            {
+            }
+
+            else if (Search_weight <= add_particle_weight)
+            {
+                if (i != 0)
+                    Search_weight += 1.0 / init_map.Particle_count;
+
+                Particle Sample;
+                Sample.x = _init_particle_vector[i].x;
+                Sample.y = _init_particle_vector[i].y;
+                Sample.weight = _init_particle_vector[i].weight;
+                Sampling_vector.push_back(Sample);
+
+                add_particle_weight = 0.0f;
+            }
+            if (i == init_map.Particle_count - 1)
+                i = 0;
+            if (Sampling_vector.size() == _init_particle_vector.size())
+                break;
+        }
+    }
+
+    void Random_Resampling(cv::Point *click_point, std::vector<Particle> &_init_particle_vector, std::vector<Particle> &Sampling_vector)
+    {
+        cv::Point *zero_point = (cv::Point *)click_point;
+        int x(zero_point->x);
+        int y(zero_point->y);
+
+        float Search_weight = 0.0f;
+        float add_particle_weight = 0.0f;
+        Sampling_vector.reserve(_init_particle_vector.size());
+
+        std::random_device rd;
+        std::default_random_engine gen(rd());
+        std::uniform_real_distribution<float> dist(0.0, 1.0);
+
+        for (int i = 0; i < init_map.Particle_count; i++)
+        {
+            Search_weight = dist(gen);
+            for (int j = 0; j < init_map.Particle_count; j++)
+            {
+                add_particle_weight += _init_particle_vector[j].weight;
+                if (Search_weight > add_particle_weight)
+                {
+                }
+                else if (Search_weight <= add_particle_weight)
+                {
+                    Particle Sample;
+                    Sample.x = _init_particle_vector[j].x;
+                    Sample.y = _init_particle_vector[j].y;
+                    Sample.weight = _init_particle_vector[j].weight;
+                    Sampling_vector.push_back(Sample);
+
+                    add_particle_weight = 0.0f;
+                    break;
+                }
+            }
+        }
+    }
+};
+
 class Motion
 {
 private:
     MouseInterface mouse_event;
+
     Particle motion_particle;
     Particle target_pose;
 
     Map first_map;
     Map check_map;
+
     Random_Particle_make random;
+
+    Sampling sampling;
 
 private:
     std::thread process;
@@ -119,7 +212,7 @@ private:
     cv::Point after_point;
     cv::Point click_point;
 
-    float Particle_weight_Up = 2.0f;
+    float Particle_weight_Up = 4.0f;
     float Particle_weight_Down = 1.0f;
 
     int Observation_range = 200;
@@ -128,6 +221,7 @@ private:
     int particle_count = first_map.Particle_count;
     std::vector<Particle> motion_particle_vector;
     std::vector<Particle> Sampling_vector;
+    std::vector<Particle> Random_Sampling_vector;
 
 public:
     std::vector<Particle> init_particle_vector;
@@ -140,6 +234,7 @@ public:
         {
             init_map.setTo(cv::Scalar(0, 0, 0));
 
+            //Step.2 Prediction
             for (int i = 0; i < particle_count; i++)
             {
                 motion_particle.x = motion_particle_vector[i].x + (int)random.GaussianRandom();
@@ -148,6 +243,7 @@ public:
                 motion_particle.weight = 1.0f / (float)particle_count;
                 init_particle_vector.push_back(motion_particle);
             }
+
             for (int i = 0; i < particle_count; i++)
                 cv::circle(init_map, cv::Point(init_particle_vector[i].x, init_particle_vector[i].y), 1, cv::Scalar(0, 0, 127), 2, -1, 0);
 
@@ -159,16 +255,22 @@ public:
                     cv::circle(init_map, cv::Point(click_point.x, click_point.y), 1, cv::Scalar(0, 255, 0), 4, -1, 0);
                 }
 
+                //Strp.3 Observation model
                 Circle_check(&click_point, init_particle_vector, init_map);
                 init_particle_vector = check_map.checkOutlier(init_particle_vector);
                 init_particle_vector = Normalize_Particle_Weight(init_particle_vector);
-                Uniform_Resampling(&click_point, init_particle_vector, init_map);
+
+                //Strp.4 ReSampling
+                sampling.Uniform_Resampling(&click_point, init_particle_vector, Sampling_vector);
+                //Random_Resampling(&click_point, init_particle_vector);
 
                 motion_particle_vector.swap(Sampling_vector);
                 Sampling_vector.clear();
             }
             else
                 motion_particle_vector.swap(init_particle_vector);
+
+            // Weight_mean_find(motion_particle_vector, init_map);
 
             cv::imshow("motion_map", init_map);
             cv::setMouseCallback("motion_map", MouseInterface::CallBackFunc, &click_point);
@@ -204,7 +306,7 @@ public:
             if (distance < Observation_range)
             {
                 inlier_count++;
-                cv::circle(init_map, cv::Point(_init_particle_vector[i].x, _init_particle_vector[i].y), 1, cv::Scalar(255, 0, 0), 2, -1, 0);
+                cv::circle(init_map, cv::Point(_init_particle_vector[i].x, _init_particle_vector[i].y), 1, cv::Scalar(127, 50, 0), 2, -1, 0);
                 _init_particle_vector[i].weight = _init_particle_vector[i].weight * Particle_weight_Up;
             }
             else
@@ -243,50 +345,30 @@ public:
         return _init_particle_vector;
     }
 
-    void Uniform_Resampling(cv::Point *click_point, std::vector<Particle> &_init_particle_vector, cv::Mat &init_map)
-    {
-        cv::Point *zero_point = (cv::Point *)click_point;
-        int x = zero_point->x;
-        int y = zero_point->y;
-
-        float Search_weight = 0.0f;
-        float add_particle_weight = 0.0f;
-        Sampling_vector.reserve(_init_particle_vector.size());
-
-        std::random_device rd;
-        std::default_random_engine gen(rd());
-        std::uniform_real_distribution<float> dist(0.0, (float)(1.0 / particle_count));
-
-        for (int i = 0; i < particle_count; i++)
-        {
-            add_particle_weight += _init_particle_vector[i].weight;
-            if (i == 0)
-                Search_weight += dist(gen);
-
-            if (Search_weight > add_particle_weight)
-            {
-            }
-
-            else if (Search_weight <= add_particle_weight)
-            {
-                if (i != 0)
-                    Search_weight += 1.0 / particle_count;
-
-                Particle Sample;
-                Sample.x = _init_particle_vector[i].x;
-                Sample.y = _init_particle_vector[i].y;
-                Sample.weight = _init_particle_vector[i].weight;
-                Sampling_vector.push_back(Sample);
-
-                add_particle_weight = 0.0f;
-            }
-            if (i == particle_count - 1)
-                i = 0;
-            if (Sampling_vector.size() == _init_particle_vector.size())
-                break;
-        }
+    double test(float value, int num)
+    {   
+        int p = pow(10, num);
+        return floor((value * p) + 0.5f) / p;
     }
 
+    void Weight_mean_find(std::vector<Particle> &_motion_particle_vector, cv::Mat &_init_map)
+    {
+        float total_weight_mean = 0.0f;
+        for(int i = 0; i < particle_count; i++)
+            total_weight_mean += _motion_particle_vector[i].weight;
+        total_weight_mean /= particle_count;
+
+        for(int j = 0; j < particle_count; j++)
+        {
+            if(test(total_weight_mean, 8) == test(_motion_particle_vector[j].weight, 8))
+            {
+                // std::cout << total_weight_mean << std::endl;
+                cv::circle(init_map, cv::Point(_motion_particle_vector[j].x, _motion_particle_vector[j].y), 1, cv::Scalar(250, 50, 0), 2, -1, 0);                
+            }
+
+        }
+        
+    }
     void runloop()
     {
         motion_process();
