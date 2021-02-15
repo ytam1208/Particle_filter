@@ -1,2 +1,2 @@
 Particle_filter
--DCATKIN_DEVEL_PREFIX=/home/cona/Particle_filter/devel -DCMAKE_INSTALL_PREFIX=/home/cona/Particle_filter/install -G Unix Makefiles
+-DCATKIN_DEVEL_PREFIX=/home/cona/Particle/devel -DCMAKE_INSTALL_PREFIX=/home/cona/Particle/install -G Unix Makefiles

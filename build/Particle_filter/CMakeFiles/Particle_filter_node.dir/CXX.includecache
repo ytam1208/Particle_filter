@@ -6,13 +6,13 @@
 
 #IncludeRegexTransform: 
 
-/home/cona/Particle_filter/src/Particle_filter/include/Particle.hpp
+/home/cona/Particle/src/Particle_filter/include/Particle.hpp
 mouse.hpp
-/home/cona/Particle_filter/src/Particle_filter/include/mouse.hpp
+/home/cona/Particle/src/Particle_filter/include/mouse.hpp
 
-/home/cona/Particle_filter/src/Particle_filter/include/mouse.hpp
+/home/cona/Particle/src/Particle_filter/include/mouse.hpp
 
-/home/cona/Particle_filter/src/Particle_filter/src/main.cpp
+/home/cona/Particle/src/Particle_filter/src/main.cpp
 iostream
 -
 math.h
@@ -30,7 +30,7 @@ mutex
 opencv2/opencv.hpp
 -
 Particle.hpp
-/home/cona/Particle_filter/src/Particle_filter/src/Particle.hpp
+/home/cona/Particle/src/Particle_filter/src/Particle.hpp
 
 /opt/ros/kinetic/include/opencv-3.3.1-dev/opencv/cxcore.h
 opencv2/core/core_c.h

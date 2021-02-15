@@ -212,10 +212,10 @@ private:
     cv::Point after_point;
     cv::Point click_point;
 
-    float Particle_weight_Up = 4.0f;
+    float Particle_weight_Up = 2.0f;
     float Particle_weight_Down = 1.0f;
 
-    int Observation_range = 200;
+    int Observation_range = 150;
 
 private:
     int particle_count = first_map.Particle_count;
@@ -270,8 +270,7 @@ public:
             else
                 motion_particle_vector.swap(init_particle_vector);
 
-            // Weight_mean_find(motion_particle_vector, init_map);
-
+            Particle_mean_find(motion_particle_vector, init_map);
             cv::imshow("motion_map", init_map);
             cv::setMouseCallback("motion_map", MouseInterface::CallBackFunc, &click_point);
             cv::waitKey(1);
@@ -315,26 +314,28 @@ public:
                 _init_particle_vector[i].weight = _init_particle_vector[i].weight * Particle_weight_Down;
             }
         }
-        cv::Point pt0(50, 100), pt1(150, 100), pt2(290, 100), pt3(420, 100), pt6(50, 50), pt7(350, 50);
+        cv::Point pt0(50, 100), pt1(150, 100), pt2(290, 100), pt3(420, 100), pt4(50, 50), pt5(350, 50);
         cv::putText(init_map, "Inlier ", pt0, 2, 1.2, cv::Scalar::all(125));
         cv::putText(init_map, std::to_string(inlier_count), pt1, 2, 1.2, cv::Scalar::all(125));
 
         cv::putText(init_map, "Outlier ", pt2, 2, 1.2, cv::Scalar::all(125));
         cv::putText(init_map, std::to_string(outlier_count), pt3, 2, 1.2, cv::Scalar::all(125));
 
-        cv::putText(init_map, "Total Particle ", pt6, 2, 1.2, cv::Scalar::all(125));
-        cv::putText(init_map, std::to_string(particle_count), pt7, 2, 1.2, cv::Scalar::all(125));
+        cv::putText(init_map, "Total Particle ", pt4, 2, 1.2, cv::Scalar::all(125));
+        cv::putText(init_map, std::to_string(particle_count), pt5, 2, 1.2, cv::Scalar::all(125));
     }
 
     std::vector<Particle> Normalize_Particle_Weight(std::vector<Particle> &_init_particle_vector)
     {
         float total_weight = 0.0f;
+        float visual_total_weight = 0.0f;
         float total = 0.0f;
 
         for (int i = 0; i < particle_count; i++)
             if (_init_particle_vector[i].weight > 0.0f)
                 total_weight += _init_particle_vector[i].weight;
 
+        
         for (int j = 0; j < particle_count; j++)
             if (_init_particle_vector[j].weight > 0.0f)
             {
@@ -342,33 +343,60 @@ public:
                 // std::cout << "weight = " << _init_particle_vector[j].weight << std::endl;
                 total += _init_particle_vector[j].weight;
             }
+
+        for(int z = 0; z < particle_count; z++)
+            visual_total_weight += _init_particle_vector[z].weight;
+
+        cv::Point pt6(540, 100), pt7(680, 100);
+        cv::putText(init_map, "Weight ", pt6, 2, 1.2, cv::Scalar::all(125));
+        cv::putText(init_map, std::to_string(visual_total_weight), pt7, 2, 1.2, cv::Scalar::all(125));
+        
         return _init_particle_vector;
     }
 
-    double test(float value, int num)
+    double Round_value(float value, int num)
     {   
         int p = pow(10, num);
         return floor((value * p) + 0.5f) / p;
     }
 
-    void Weight_mean_find(std::vector<Particle> &_motion_particle_vector, cv::Mat &_init_map)
+    void Weight_mean_find(std::vector<Particle> &_init_particle_vector, cv::Mat &_init_map)
     {
         float total_weight_mean = 0.0f;
         for(int i = 0; i < particle_count; i++)
-            total_weight_mean += _motion_particle_vector[i].weight;
+            total_weight_mean += _init_particle_vector[i].weight;
         total_weight_mean /= particle_count;
 
         for(int j = 0; j < particle_count; j++)
         {
-            if(test(total_weight_mean, 8) == test(_motion_particle_vector[j].weight, 8))
+            if(Round_value(total_weight_mean, 10) == Round_value(_init_particle_vector[j].weight, 10))
             {
                 // std::cout << total_weight_mean << std::endl;
-                cv::circle(init_map, cv::Point(_motion_particle_vector[j].x, _motion_particle_vector[j].y), 1, cv::Scalar(250, 50, 0), 2, -1, 0);                
+                cv::circle(init_map, cv::Point(_init_particle_vector[j].x, _init_particle_vector[j].y), 1, cv::Scalar(255, 255, 0), 2, -1, 0);                
             }
-
+            // if(total_weight_mean == _init_particle_vector[j].weight)
+            // {
+            //     std::cout << total_weight_mean << std::endl;
+            //     cv::circle(init_map, cv::Point(_init_particle_vector[j].x, _init_particle_vector[j].y), 1, cv::Scalar(255, 255, 0), 2, -1, 0);                
+            // }
         }
-        
     }
+
+    void Particle_mean_find(std::vector<Particle> &_init_particle_vector, cv::Mat &_init_map)
+    {
+        int total_x = 0;
+        int total_y = 0;
+        for(int i = 0; i < particle_count; i++)
+        {
+            total_x += _init_particle_vector[i].x;
+            total_y += _init_particle_vector[i].y;
+        }
+        total_x /= particle_count;
+        total_y /= particle_count;
+
+        cv::circle(_init_map, cv::Point(total_x, total_y), 1, cv::Scalar(255, 255, 0), 2, -1, 0);                
+    }
+
     void runloop()
     {
         motion_process();

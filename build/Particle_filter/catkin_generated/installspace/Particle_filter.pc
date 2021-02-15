@@ -1,4 +1,4 @@
-prefix=/home/cona/Particle_filter/install
+prefix=/home/cona/Particle/install
 
 Name: Particle_filter
 Description: Description of Particle_filter
