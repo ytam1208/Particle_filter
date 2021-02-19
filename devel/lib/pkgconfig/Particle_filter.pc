@@ -1,8 +1,0 @@
-prefix=/home/cona/Particle/devel
-
-Name: Particle_filter
-Description: Description of Particle_filter
-Version: 0.0.0
-Cflags: -I/home/cona/Particle/src/Particle_filter/include
-Libs: -L${prefix}/lib 
-Requires: roscpp

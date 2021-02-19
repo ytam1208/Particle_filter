@@ -122,16 +122,12 @@ public:
         {
             add_particle_weight += _init_particle_vector[i].weight;
             if (i == 0)
-                Search_weight += dist(gen);
-
+               Search_weight += dist(gen);
             if (Search_weight > add_particle_weight)
-            {
-            }
-
+            {}
             else if (Search_weight <= add_particle_weight)
             {
-                if (i != 0)
-                    Search_weight += 1.0 / init_map.Particle_count;
+                Search_weight += (float)(1.0 / init_map.Particle_count);
 
                 Particle Sample;
                 Sample.x = _init_particle_vector[i].x;
@@ -147,7 +143,6 @@ public:
                 break;
         }
     }
-
     void Random_Resampling(cv::Point *click_point, std::vector<Particle> &_init_particle_vector, std::vector<Particle> &Sampling_vector)
     {
         cv::Point *zero_point = (cv::Point *)click_point;
@@ -212,7 +207,7 @@ private:
     cv::Point after_point;
     cv::Point click_point;
 
-    float Particle_weight_Up = 2.0f;
+    float Particle_weight_Up = 6.0f;
     float Particle_weight_Down = 1.0f;
 
     int Observation_range = 150;
@@ -234,7 +229,7 @@ public:
         {
             init_map.setTo(cv::Scalar(0, 0, 0));
 
-            //Step.2 Prediction
+            // Step.2 Prediction
             for (int i = 0; i < particle_count; i++)
             {
                 motion_particle.x = motion_particle_vector[i].x + (int)random.GaussianRandom();
@@ -262,7 +257,7 @@ public:
 
                 //Strp.4 ReSampling
                 sampling.Uniform_Resampling(&click_point, init_particle_vector, Sampling_vector);
-                //Random_Resampling(&click_point, init_particle_vector);
+                // sampling.Random_Resampling(&click_point, init_particle_vector, Sampling_vector);
 
                 motion_particle_vector.swap(Sampling_vector);
                 Sampling_vector.clear();
