@@ -39,12 +39,13 @@ public:
     double GaussianRandom() //make Gaussian normal distribution
     {
         int average = 0;
-        double segma = 20.0;
+        double sigma = 20.0;
 
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::normal_distribution<double> dist(average, segma);
-        double result = std::round(dist(gen));
+        
+        std::normal_distribution<double> dist(average, sigma);
+        double result = dist(gen);
 
         return result;
     }
@@ -215,7 +216,7 @@ private:
     float Particle_weight_Up = 4.0f;
     float Particle_weight_Down = 1.0f;
 
-    int Observation_range = 200;
+    int Observation_range = 100;
 
 private:
     int particle_count = first_map.Particle_count;
