@@ -211,11 +211,7 @@ private:
     float Particle_weight_Up = 6.0f;
     float Particle_weight_Down = 1.0f;
 
-<<<<<<< HEAD
-    int Observation_range = 100;
-=======
     int Observation_range = 150;
->>>>>>> 1aa7543702aba0cfe4399688c995029bd21ecadf
 
 private:
     int particle_count = first_map.Particle_count;

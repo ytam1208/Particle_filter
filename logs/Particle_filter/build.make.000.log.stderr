@@ -1,0 +1,8 @@
+In file included from /Users/yeontaemin/github/Particle_filter/src/Particle_filter/src/main.cpp:11:
+[1m/Users/yeontaemin/github/Particle_filter/src/Particle_filter/include/Particle.hpp:214:1: [0m[0;1;31merror: [0m[1mversion control conflict marker in file[0m
+<<<<<<< HEAD
+[0;1;32m^
+[0m1 error generated.
+make[2]: *** [CMakeFiles/Particle_filter_node.dir/build.make:76: CMakeFiles/Particle_filter_node.dir/src/main.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:637: CMakeFiles/Particle_filter_node.dir/all] Error 2
+make: *** [Makefile:146: all] Error 2
